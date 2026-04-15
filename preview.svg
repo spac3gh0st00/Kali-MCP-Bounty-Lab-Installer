@@ -1,0 +1,181 @@
+<svg viewBox="0 0 960 620" xmlns="http://www.w3.org/2000/svg" font-family="'Courier New', monospace">
+  <defs>
+    <linearGradient id="accentGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softglow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="windowClip">
+      <rect width="960" height="620" rx="10" ry="10"/>
+    </clipPath>
+  </defs>
+
+  <!-- Window outer shadow -->
+  <rect x="4" y="8" width="960" height="620" rx="10" fill="#000000" opacity="0.5"/>
+
+  <!-- Window background -->
+  <rect width="960" height="620" rx="10" fill="#0b0b0b" clip-path="url(#windowClip)"/>
+
+  <!-- Title bar -->
+  <rect width="960" height="38" fill="#0f0f0f"/>
+  <rect y="38" width="960" height="1" fill="#1e1e1e"/>
+
+  <!-- Traffic lights -->
+  <circle cx="22" cy="19" r="6" fill="#ff5f56"/>
+  <circle cx="42" cy="19" r="6" fill="#ffbd2e"/>
+  <circle cx="62" cy="19" r="6" fill="#27c93f"/>
+
+  <!-- Title bar text -->
+  <text x="480" y="24" fill="#555555" font-size="12" text-anchor="middle" font-family="'Courier New', monospace">Kali MCP Bounty Lab  —  Installer</text>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <rect x="0" y="38" width="215" height="582" fill="#0f0f0f"/>
+  <rect x="215" y="38" width="1" fill="#1e1e1e" height="582"/>
+
+  <!-- Sidebar logo area -->
+  <text x="18" y="76" fill="#00ff88" font-size="15" font-weight="bold" filter="url(#glow)" font-family="'Courier New', monospace">⚡ KALI MCP</text>
+  <text x="18" y="93" fill="#555555" font-size="10" font-family="'Courier New', monospace">Bounty Lab Installer</text>
+
+  <!-- OS badge -->
+  <rect x="18" y="100" width="68" height="20" rx="4" fill="#1c1c1c"/>
+  <text x="26" y="114" fill="#666666" font-size="10" font-family="'Courier New', monospace">🐧  Linux</text>
+
+  <!-- Sidebar divider -->
+  <rect x="0" y="128" width="215" height="1" fill="#1e1e1e"/>
+
+  <!-- Step list -->
+  <!-- Step 1 - ACTIVE -->
+  <rect x="0" y="138" width="215" height="36" fill="#1c1c1c"/>
+  <rect x="0" y="138" width="3" height="36" fill="#00ff88"/>
+  <text x="18" y="161" fill="#00ff88" font-size="13" filter="url(#glow)" font-family="'Courier New', monospace">●</text>
+  <text x="36" y="161" fill="#f0f0f0" font-size="12" font-weight="bold" font-family="'Courier New', monospace">Welcome</text>
+
+  <!-- Step 2 -->
+  <text x="18" y="197" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="197" fill="#444444" font-size="12" font-family="'Courier New', monospace">Prerequisites</text>
+
+  <!-- Step 3 -->
+  <text x="18" y="232" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="232" fill="#444444" font-size="12" font-family="'Courier New', monospace">Docker</text>
+
+  <!-- Step 4 -->
+  <text x="18" y="267" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="267" fill="#444444" font-size="12" font-family="'Courier New', monospace">Kali Container</text>
+
+  <!-- Step 5 -->
+  <text x="18" y="302" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="302" fill="#444444" font-size="12" font-family="'Courier New', monospace">MCP Server</text>
+
+  <!-- Step 6 -->
+  <text x="18" y="337" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="337" fill="#444444" font-size="12" font-family="'Courier New', monospace">Discord Bot</text>
+
+  <!-- Step 7 -->
+  <text x="18" y="372" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="372" fill="#444444" font-size="12" font-family="'Courier New', monospace">Health Monitor</text>
+
+  <!-- Step 8 -->
+  <text x="18" y="407" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="407" fill="#444444" font-size="12" font-family="'Courier New', monospace">Tailscale</text>
+
+  <!-- Step 9 -->
+  <text x="18" y="442" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="442" fill="#444444" font-size="12" font-family="'Courier New', monospace">Firewall</text>
+
+  <!-- Step 10 -->
+  <text x="18" y="477" fill="#333333" font-size="13" font-family="'Courier New', monospace">○</text>
+  <text x="36" y="477" fill="#444444" font-size="12" font-family="'Courier New', monospace">Done</text>
+
+  <!-- Sidebar footer -->
+  <text x="18" y="608" fill="#2a2a2a" font-size="9" font-family="'Courier New', monospace">v1.0  •  github.com/spac3gh0st00</text>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+
+  <!-- ASCII Banner -->
+  <text x="232" y="80"  fill="#00ff88" font-size="9.5" filter="url(#softglow)" font-family="'Courier New', monospace"> ██╗  ██╗ █████╗ ██╗     ██╗</text>
+  <text x="232" y="93"  fill="#00ff88" font-size="9.5" filter="url(#softglow)" font-family="'Courier New', monospace"> ██║ ██╔╝██╔══██╗██║     ██║</text>
+  <text x="232" y="106" fill="#00ff88" font-size="9.5" filter="url(#softglow)" font-family="'Courier New', monospace"> █████╔╝ ███████║██║     ██║</text>
+  <text x="232" y="119" fill="#00ff88" font-size="9.5" filter="url(#softglow)" font-family="'Courier New', monospace"> ██╔═██╗ ██╔══██║██║     ██║</text>
+  <text x="232" y="132" fill="#00ff88" font-size="9.5" filter="url(#softglow)" font-family="'Courier New', monospace"> ██║  ██╗██║  ██║███████╗██║</text>
+  <text x="232" y="145" fill="#00ff88" font-size="9.5" filter="url(#softglow)" font-family="'Courier New', monospace"> ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  MCP Bounty Lab</text>
+  <text x="232" y="160" fill="#00cc6a" font-size="9.5" font-family="'Courier New', monospace">                                    — spac3gh0st00</text>
+
+  <!-- Welcome heading -->
+  <text x="232" y="198" fill="#f0f0f0" font-size="21" font-weight="bold" font-family="'Courier New', monospace">Welcome</text>
+  <text x="232" y="216" fill="#666666" font-size="11" font-family="'Courier New', monospace">Platform detected: Linux (Ubuntu VM).  Each step runs a phase and streams output live.</text>
+
+  <!-- File check card -->
+  <rect x="232" y="226" width="700" height="52" rx="8" fill="#1c1c1c"/>
+  <text x="250" y="248" fill="#00ff88" font-size="12" font-family="'Courier New', monospace">✓  install_linux.sh  found</text>
+  <text x="250" y="265" fill="#333333" font-size="10" font-family="'Courier New', monospace">📁  /home/user/kali-lab-installer</text>
+
+  <!-- Feature cards row 1 -->
+  <rect x="232" y="288" width="340" height="42" rx="8" fill="#1c1c1c"/>
+  <text x="252" y="315" font-size="18" font-family="'Courier New', monospace">🔍</text>
+  <text x="284" y="314" fill="#f0f0f0" font-size="12" font-family="'Courier New', monospace">Prerequisites Check</text>
+
+  <rect x="584" y="288" width="348" height="42" rx="8" fill="#1c1c1c"/>
+  <text x="604" y="315" font-size="18" font-family="'Courier New', monospace">🐳</text>
+  <text x="636" y="314" fill="#f0f0f0" font-size="12" font-family="'Courier New', monospace">Docker setup</text>
+
+  <!-- Feature cards row 2 -->
+  <rect x="232" y="340" width="340" height="42" rx="8" fill="#1c1c1c"/>
+  <text x="252" y="367" font-size="18" font-family="'Courier New', monospace">💀</text>
+  <text x="284" y="366" fill="#f0f0f0" font-size="12" font-family="'Courier New', monospace">Kali container clone + build</text>
+
+  <rect x="584" y="340" width="348" height="42" rx="8" fill="#1c1c1c"/>
+  <text x="604" y="367" font-size="18" font-family="'Courier New', monospace">🔗</text>
+  <text x="636" y="366" fill="#f0f0f0" font-size="12" font-family="'Courier New', monospace">MCP server + health check</text>
+
+  <!-- Feature cards row 3 -->
+  <rect x="232" y="392" width="340" height="42" rx="8" fill="#1c1c1c"/>
+  <text x="252" y="419" font-size="18" font-family="'Courier New', monospace">💬</text>
+  <text x="284" y="418" fill="#f0f0f0" font-size="12" font-family="'Courier New', monospace">Discord Bot  (optional)</text>
+
+  <rect x="584" y="392" width="348" height="42" rx="8" fill="#1c1c1c"/>
+  <text x="604" y="419" font-size="18" font-family="'Courier New', monospace">📡</text>
+  <text x="636" y="418" fill="#f0f0f0" font-size="12" font-family="'Courier New', monospace">Health Monitor  (optional)</text>
+
+  <!-- Feature cards row 4 -->
+  <rect x="232" y="444" width="340" height="42" rx="8" fill="#1c1c1c"/>
+  <text x="252" y="471" font-size="18" font-family="'Courier New', monospace">🔒</text>
+  <text x="284" y="470" fill="#f0f0f0" font-size="12" font-family="'Courier New', monospace">Tailscale  (optional)</text>
+
+  <rect x="584" y="444" width="348" height="42" rx="8" fill="#1c1c1c"/>
+  <text x="604" y="471" font-size="18" font-family="'Courier New', monospace">🛡️</text>
+  <text x="636" y="470" fill="#f0f0f0" font-size="12" font-family="'Courier New', monospace">UFW Firewall rules</text>
+
+  <!-- ═══ BOTTOM NAV ═══ -->
+  <rect x="0" y="554" width="960" height="66" fill="#0f0f0f"/>
+  <rect x="0" y="554" width="960" height="1" fill="#1e1e1e"/>
+
+  <!-- Back button -->
+  <rect x="232" y="568" width="100" height="38" rx="6" fill="#1c1c1c"/>
+  <text x="282" y="592" fill="#666666" font-size="12" text-anchor="middle" font-family="'Courier New', monospace">← Back</text>
+
+  <!-- Step label -->
+  <text x="480" y="592" fill="#444444" font-size="11" text-anchor="middle" font-family="'Courier New', monospace">Step 1 / 10</text>
+
+  <!-- Next button -->
+  <rect x="728" y="568" width="130" height="38" rx="6" fill="#00ff88" filter="url(#softglow)"/>
+  <text x="793" y="592" fill="#000000" font-size="13" font-weight="bold" text-anchor="middle" font-family="'Courier New', monospace">Next  →</text>
+
+  <!-- Accent glow strip along top -->
+  <rect x="216" y="38" width="744" height="3" fill="url(#accentGlow)"/>
+
+  <!-- Window border -->
+  <rect width="960" height="620" rx="10" fill="none" stroke="#1e1e1e" stroke-width="1" clip-path="url(#windowClip)"/>
+</svg>
