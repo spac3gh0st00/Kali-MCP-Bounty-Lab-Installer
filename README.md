@@ -193,6 +193,7 @@ powershell -ExecutionPolicy Bypass -File install_windows.ps1 -Phase portproxy -V
 | Resource | Link |
 |----------|------|
 | Original Lab (manual setup) | [github.com/spac3gh0st00/Kali-MCP-Bounty-Lab](https://github.com/spac3gh0st00/Kali-MCP-Bounty-Lab) |
+|BsidesMCPDemo| https://github.com/kannanprabu/BsidesMCPDemo by Kannan Prabu Ramamoorthy — the BSides San Diego workshop demo that inspired OG project
 | Kali MCP Server | [github.com/k3nn3dy-ai/kali-mcp](https://github.com/k3nn3dy-ai/kali-mcp) |
 | Claude Desktop | [claude.ai/download](https://claude.ai/download) |
 | mcp-remote (npm) | [npmjs.com/package/mcp-remote](https://www.npmjs.com/package/mcp-remote) |
