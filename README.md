@@ -72,7 +72,7 @@ bash run.sh
 
 `run.sh` will auto-install `python3-tk` and `customtkinter` if missing, then open the GUI.
 
-### Windows (Host Machine)
+### Windows (Host Machine or VM inside VMware)
 
 ```bat
 run.bat
