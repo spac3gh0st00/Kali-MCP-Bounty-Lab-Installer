@@ -103,7 +103,7 @@ The installer detects your OS and shows only the relevant steps.
 | **Firewall** | Configures UFW — SSH open, port 8000 locked to your Windows host IP |
 | **Done** | Summary screen with next steps |
 
-### Windows Steps (Host Machine)
+### Windows Steps (Host Machine or VM inside VMware)
 
 | Step | What It Does |
 |------|-------------|
