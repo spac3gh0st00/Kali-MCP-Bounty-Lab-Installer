@@ -158,11 +158,14 @@ def terminal(parent, height=200):
 
 
 def twrite(t, text):
-    """Thread-safe terminal write."""
-    t.configure(state="normal")
-    t.insert("end", text)
-    t.see("end")
-    t.configure(state="disabled")
+    """Thread-safe terminal write — silently ignores destroyed-widget errors."""
+    try:
+        t.configure(state="normal")
+        t.insert("end", text)
+        t.see("end")
+        t.configure(state="disabled")
+    except Exception:
+        pass  # widget was destroyed (user navigated away while script ran)
 
 
 # ──────────────────────────────────────────────
@@ -232,8 +235,12 @@ def run_script(app, term, phase, extra_args=None, run_btn=None):
         finally:
             if run_btn:
                 try:
-                    app.after(0, lambda: run_btn.configure(
-                        state="normal", text=run_btn._original_text))
+                    def _restore():
+                        try:
+                            run_btn.configure(state="normal", text=run_btn._original_text)
+                        except Exception:
+                            pass
+                    app.after(0, _restore)
                 except Exception:
                     pass
 
@@ -654,23 +661,23 @@ class KaliLabInstaller(ctk.CTk):
 
         self._field_row(creds, "Bot Token:",
                         var=self.v_discord_token,
-                        placeholder="Bot token from Discord Developer Portal",
+                        placeholder="Paste bot token from Discord Developer Portal  (starts with MT... or OT...)",
                         width=340, show="*")
         self._field_row(creds, "Guild (Server) ID:",
                         var=self.v_discord_guild,
-                        placeholder="Right-click server name → Copy Server ID",
+                        placeholder="Numbers only — right-click server name → Copy Server ID",
                         width=240)
         self._field_row(creds, "Your User ID:",
                         var=self.v_discord_user_id,
-                        placeholder="Right-click your name → Copy User ID",
+                        placeholder="Numbers only — right-click your name → Copy User ID",
                         width=240)
         self._field_row(creds, "Anthropic API Key:",
                         var=self.v_anthropic_key,
-                        placeholder="sk-ant-...",
+                        placeholder="Paste API key from console.anthropic.com  (starts with sk-ant-...)",
                         width=340, show="*")
         self._field_row(creds, "Discord Webhook URL:",
                         var=self.v_webhook_url,
-                        placeholder="Webhook URL for health alerts",
+                        placeholder="Paste webhook URL  (starts with https://discord.com/api/webhooks/...)",
                         width=340)
 
         ctk.CTkFrame(creds, height=10, fg_color="transparent").pack()
@@ -698,6 +705,45 @@ class KaliLabInstaller(ctk.CTk):
             user_id = self.v_discord_user_id.get().strip()
             ant_key = self.v_anthropic_key.get().strip()
             webhook = self.v_webhook_url.get().strip()
+
+            # ── Validate field formats before writing anything ────────────
+            errors = []
+
+            if guild and not guild.isdigit():
+                errors.append(
+                    f"  ✗  Guild (Server) ID must be numbers only.\n"
+                    f"     Got: {guild[:30]}...\n"
+                    f"     Tip: right-click your server name → Copy Server ID\n"
+                )
+
+            if user_id and not user_id.isdigit():
+                errors.append(
+                    f"  ✗  Your User ID must be numbers only.\n"
+                    f"     Got: {user_id[:30]}...\n"
+                    f"     Tip: Settings → Advanced → enable Developer Mode,\n"
+                    f"          then right-click your username → Copy User ID\n"
+                )
+
+            if ant_key and not ant_key.startswith("sk-ant-"):
+                errors.append(
+                    f"  ✗  Anthropic API Key should start with 'sk-ant-'.\n"
+                    f"     Got: {ant_key[:20]}...\n"
+                    f"     Tip: get it from console.anthropic.com → API Keys\n"
+                )
+
+            if webhook and not webhook.startswith("https://discord.com/api/webhooks/"):
+                errors.append(
+                    f"  ✗  Webhook URL should start with 'https://discord.com/api/webhooks/'.\n"
+                    f"     Got: {webhook[:40]}...\n"
+                    f"     Tip: channel settings → Integrations → Webhooks → Copy URL\n"
+                )
+
+            if errors:
+                twrite(t, "\n─── Credential errors — fix these before installing ───\n")
+                for e in errors:
+                    twrite(t, e)
+                twrite(t, "──────────────────────────────────────────────────────\n")
+                return   # stop here — do not write .env or run the script
 
             # Only write fields that were actually filled in
             lines_out = []
