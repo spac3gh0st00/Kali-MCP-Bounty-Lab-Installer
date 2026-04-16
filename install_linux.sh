@@ -57,6 +57,9 @@ fi
 # Expand ~ in INSTALL_DIR now so every phase uses the real path
 INSTALL_DIR="${INSTALL_DIR/#\~/$HOME}"
 
+# Directory this script lives in (so we can copy bundled files from it)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # ── Colour helpers ────────────────────────────────────────────────────────────
 info()    { echo "  ✓  $*"; }
 warn()    { echo "  ⚠  $*"; }
@@ -534,22 +537,23 @@ phase_discord() {
     || { err "pip install failed — check network and try again"; return 1; }
   info "Python deps installed"
 
-  # ── Verify bot script exists — download if missing ───────────────────────
-  if [[ ! -f "${INSTALL_DIR}/discord_kali_bot.py" ]]; then
-    warn "discord_kali_bot.py not found in ${INSTALL_DIR} — downloading from Bounty Lab repo..."
-    local bot_url="https://raw.githubusercontent.com/spac3gh0st00/Kali-MCP-Bounty-Lab/main/discord_kali_bot.py"
-    curl -fsSL "$bot_url" -o "${INSTALL_DIR}/discord_kali_bot.py" 2>&1 \
-      || { err "curl download failed — check your internet connection"; return 1; }
-    chmod +x "${INSTALL_DIR}/discord_kali_bot.py"
-    if [[ -f "${INSTALL_DIR}/discord_kali_bot.py" ]]; then
-      info "discord_kali_bot.py downloaded successfully"
+  # ── Verify / copy bot scripts ────────────────────────────────────────────
+  for bot_file in discord_kali_bot.py investigate.py; do
+    if [[ ! -f "${INSTALL_DIR}/${bot_file}" ]]; then
+      if [[ -f "${SCRIPT_DIR}/${bot_file}" ]]; then
+        info "Copying ${bot_file} from installer directory..."
+        cp "${SCRIPT_DIR}/${bot_file}" "${INSTALL_DIR}/${bot_file}" \
+          && info "${bot_file}: copied" \
+          || { err "Failed to copy ${bot_file}"; return 1; }
+      else
+        err "${bot_file} not found in ${INSTALL_DIR} or ${SCRIPT_DIR}"
+        err "Add ${bot_file} to your installer folder alongside install_linux.sh and re-run."
+        return 1
+      fi
     else
-      err "discord_kali_bot.py still not found after download attempt"
-      return 1
+      info "${bot_file}: found"
     fi
-  else
-    info "discord_kali_bot.py: found"
-  fi
+  done
 
   # ── Systemd service ──────────────────────────────────────────────────────
   local svc_file="/tmp/discord-kali-bot.service"
