@@ -534,26 +534,21 @@ phase_discord() {
     || { err "pip install failed — check network and try again"; return 1; }
   info "Python deps installed"
 
-  # ── Copy / fetch bot script ──────────────────────────────────────────────
+  # ── Verify bot script exists — download if missing ───────────────────────
   if [[ ! -f "${INSTALL_DIR}/discord_kali_bot.py" ]]; then
-    # Preferred: bundled alongside the installer scripts
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [[ -f "${SCRIPT_DIR}/discord_kali_bot.py" ]]; then
-      cp "${SCRIPT_DIR}/discord_kali_bot.py" "${INSTALL_DIR}/discord_kali_bot.py" \
-        && info "discord_kali_bot.py copied from installer directory" \
-        || { err "Could not copy discord_kali_bot.py to ${INSTALL_DIR}"; return 1; }
-    else
-      # Fallback: download from the lab repo
-      warn "discord_kali_bot.py not found in installer directory — downloading from lab repo..."
-      curl -fsSL \
-        "https://raw.githubusercontent.com/spac3gh0st00/Kali-MCP-Bounty-Lab/main/discord_kali_bot.py" \
-        -o "${INSTALL_DIR}/discord_kali_bot.py" \
-        || { err "Could not download discord_kali_bot.py — add it to the installer folder or check your internet connection"; return 1; }
-      info "discord_kali_bot.py downloaded from lab repo"
-    fi
+    warn "discord_kali_bot.py not found in ${INSTALL_DIR} — downloading from Bounty Lab repo..."
+    local bot_url="https://raw.githubusercontent.com/spac3gh0st00/Kali-MCP-Bounty-Lab/main/discord_kali_bot.py"
+    curl -fsSL "$bot_url" -o "${INSTALL_DIR}/discord_kali_bot.py" 2>&1 \
+      || { err "curl download failed — check your internet connection"; return 1; }
     chmod +x "${INSTALL_DIR}/discord_kali_bot.py"
+    if [[ -f "${INSTALL_DIR}/discord_kali_bot.py" ]]; then
+      info "discord_kali_bot.py downloaded successfully"
+    else
+      err "discord_kali_bot.py still not found after download attempt"
+      return 1
+    fi
   else
-    info "discord_kali_bot.py already present"
+    info "discord_kali_bot.py: found"
   fi
 
   # ── Systemd service ──────────────────────────────────────────────────────
