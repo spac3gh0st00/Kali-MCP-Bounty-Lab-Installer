@@ -52,13 +52,14 @@ Kali-MCP-Bounty-Lab-Installer/
 ├── kali_lab_installer.py   # Cross-platform GUI wizard (customtkinter)
 ├── install_linux.sh        # Phased bash installer (Ubuntu VM)
 ├── install_windows.ps1     # Phased PowerShell installer (Windows host)
+├── discord_kali_bot.py     # Discord bot — bundled so the Discord phase can copy it in place
 ├── run.sh                  # Linux launcher — checks deps, then opens GUI
 ├── run.bat                 # Windows launcher — checks deps, then opens GUI
 ├── preview.svg             # GUI preview image
 └── LICENSE                 # MIT License
 ```
 
-All five scripts must be in the **same folder**.
+All files must be in the **same folder**.
 
 ---
 
@@ -145,6 +146,8 @@ Before running the installer, you need:
 | Anthropic API Key | Both | [console.anthropic.com](https://console.anthropic.com) — $5 credit lasts weeks |
 
 Run `run.sh` / `run.bat` first — it handles Python and `customtkinter` automatically.
+
+> **Note:** `discord_kali_bot.py` must be in the same folder as the installer scripts. The Discord phase copies it into place automatically — no manual steps needed.
 
 ---
 
