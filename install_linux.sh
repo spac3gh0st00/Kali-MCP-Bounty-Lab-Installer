@@ -568,9 +568,12 @@ Type=simple
 User=${USER}
 WorkingDirectory=${INSTALL_DIR}
 EnvironmentFile=${INSTALL_DIR}/.env
+Environment=PYTHONUNBUFFERED=1
 ExecStart=${INSTALL_DIR}/venv/bin/python3 ${INSTALL_DIR}/discord_kali_bot.py
 Restart=on-failure
 RestartSec=10
+StandardOutput=journal
+StandardError=journal
 NoNewPrivileges=yes
 PrivateTmp=yes
 
@@ -658,8 +661,8 @@ def send_discord(status):
 
 def check_health():
     try:
-        r = requests.get(HEALTH_URL, timeout=3)
-        return "up" if r.status_code == 200 else "degraded"
+        r = requests.get(HEALTH_URL, timeout=3, headers={"Accept": "application/json, text/event-stream"})
+        return "up" if r.status_code in (200, 400, 406) else "degraded"
     except requests.exceptions.ConnectionError:
         return "down"
     except requests.exceptions.Timeout:
@@ -706,9 +709,12 @@ Type=simple
 User=${USER}
 WorkingDirectory=${INSTALL_DIR}
 EnvironmentFile=${INSTALL_DIR}/.env
+Environment=PYTHONUNBUFFERED=1
 ExecStart=${INSTALL_DIR}/venv/bin/python3 ${INSTALL_DIR}/health_monitor.py
 Restart=always
 RestartSec=10
+StandardOutput=journal
+StandardError=journal
 NoNewPrivileges=yes
 PrivateTmp=yes
 

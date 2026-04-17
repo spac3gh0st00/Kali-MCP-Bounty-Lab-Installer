@@ -63,31 +63,30 @@ def audit(user_id: int, username: str, tool: str, args: dict, result_len: int):
 def audit_denied(user_id: int, username: str, reason: str):
     logging.warning(f"DENIED user={username}({user_id}) reason={reason}")
 
-# ── MCP SSE Client ─────────────────────────────────────────────────────────────
+# ── MCP Streamable HTTP Client ─────────────────────────────────────────────────
 
 async def call_mcp_tool(tool_name: str, arguments: dict, timeout: int = 90) -> str:
     """
-    Talks to the Kali MCP server via the SSE protocol.
+    Talks to the Kali MCP server via the Streamable HTTP protocol.
 
-    MCP SSE flow:
-      1. GET /sse              → receive 'endpoint' event with session URL
-      2. POST session_url      → send initialize handshake
-      3. POST session_url      → send tools/call
-      4. Read SSE stream       → wait for matching JSON-RPC response
+    Flow:
+      1. POST /mcp  → initialize  (get mcp-session-id from response header)
+      2. POST /mcp  → notifications/initialized
+      3. POST /mcp  → tools/call  (read SSE stream or JSON from response body)
     """
     if tool_name in BLOCKED_TOOLS:
         return f"❌ Tool `{tool_name}` is blocked from Discord. Use Claude Desktop locally."
 
-    session_url = None
-    tool_call_id = 3          # id=1 → init, id=2 → initialized notification, id=3 → tool call
-    result_text  = [f"⏱️ No response from MCP server after {timeout}s."]
-    got_result   = asyncio.Event()
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+    }
 
-    async def post_messages(s_url: str):
-        """Fire off initialize + tool call once we have the session URL."""
-        async with httpx.AsyncClient(timeout=30) as poster:
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+
             # 1. Initialize
-            await poster.post(s_url, json={
+            init_resp = await client.post(f"{MCP_BASE}/mcp", headers=headers, json={
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "initialize",
@@ -97,79 +96,72 @@ async def call_mcp_tool(tool_name: str, arguments: dict, timeout: int = 90) -> s
                     "clientInfo": {"name": "discord-kali-bot", "version": "1.0"}
                 }
             })
-            # 2. Initialized notification (required by protocol)
-            await poster.post(s_url, json={
+
+            session_id = init_resp.headers.get("mcp-session-id")
+            if not session_id:
+                return "❌ MCP server did not return a session ID."
+
+            headers["mcp-session-id"] = session_id
+
+            # 2. Initialized notification
+            await client.post(f"{MCP_BASE}/mcp", headers=headers, json={
                 "jsonrpc": "2.0",
                 "method": "notifications/initialized",
                 "params": {}
             })
-            # 3. Tool call
-            await poster.post(s_url, json={
+
+            # 3. Tool call — response may be SSE stream or plain JSON
+            async with client.stream("POST", f"{MCP_BASE}/mcp", headers=headers, json={
                 "jsonrpc": "2.0",
-                "id": tool_call_id,
+                "id": 3,
                 "method": "tools/call",
                 "params": {
                     "name": tool_name,
                     "arguments": arguments
                 }
-            })
+            }) as tool_resp:
+                raw_body = await tool_resp.aread()
+                body_text = raw_body.decode("utf-8", errors="replace")
 
-    try:
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            async with client.stream("GET", f"{MCP_BASE}/sse") as resp:
-                async for raw in resp.aiter_lines():
-                    line = raw.strip()
-
-                    # Step 1 — grab session URL from the endpoint event
-                    if line.startswith("data:") and session_url is None:
-                        path = line[len("data:"):].strip()
-                        if "/messages" in path:
-                            session_url = MCP_BASE + path
-                            asyncio.create_task(post_messages(session_url))
-                        continue
-
-                    # Step 2 — parse SSE data lines for our tool result
-                    if line.startswith("data:") and session_url:
-                        raw_data = line[len("data:"):].strip()
+                # Strip SSE framing if present
+                data = None
+                for line in body_text.splitlines():
+                    line = line.strip()
+                    if line.startswith("data:"):
+                        payload = line[len("data:"):].strip()
                         try:
-                            data = json.loads(raw_data)
-                            if not isinstance(data, dict):
-                                continue
-                            if data.get("id") != tool_call_id:
-                                continue
-
-                            if "result" in data:
-                                content = data["result"].get("content", [])
-                                text = "\n".join(
-                                    c.get("text", "")
-                                    for c in content
-                                    if c.get("type") == "text"
-                                )
-                                result_text[0] = text or "✅ Tool completed with no text output."
-                            elif "error" in data:
-                                err = data["error"]
-                                result_text[0] = (
-                                    f"❌ MCP Error [{err.get('code', '?')}]: "
-                                    f"{err.get('message', 'Unknown error')}"
-                                )
-
-                            got_result.set()
+                            data = json.loads(payload)
                             break
-
-                        except (json.JSONDecodeError, KeyError):
+                        except json.JSONDecodeError:
                             continue
 
-                    if got_result.is_set():
-                        break
+                # Fallback: try parsing entire body as JSON
+                if data is None:
+                    try:
+                        data = json.loads(body_text)
+                    except json.JSONDecodeError:
+                        return f"❌ Unparseable response: {body_text[:200]}"
+
+        if "result" in data:
+            content = data["result"].get("content", [])
+            text = "\n".join(
+                c.get("text", "")
+                for c in content
+                if c.get("type") == "text"
+            )
+            return text or "✅ Tool completed with no text output."
+        elif "error" in data:
+            err = data["error"]
+            return f"❌ MCP Error [{err.get('code', '?')}]: {err.get('message', 'Unknown error')}"
+        else:
+            return f"❌ Unexpected response: {data}"
 
     except httpx.TimeoutException:
-        result_text[0] = f"⏱️ Command timed out after {timeout}s. Try a lighter scan type."
+        return f"⏱️ Command timed out after {timeout}s. Try a lighter scan type."
     except httpx.ConnectError:
-        result_text[0] = "❌ Cannot reach MCP server at localhost:8000. Is the container running?"
+        return "❌ Cannot reach MCP server at localhost:8000. Is the container running?"
     except Exception as exc:
-        result_text[0] = f"❌ Bot error: {exc}"
-
-    return result_text[0]
+        return f"❌ Bot error: {exc}"
 
 # ── Discord Bot Setup ──────────────────────────────────────────────────────────
 
@@ -375,10 +367,13 @@ setup_investigate(tree, run_tool, call_mcp_tool, is_authorized, audit, audit_den
 
 @client.event
 async def on_ready():
-    await tree.sync()
+    guild = discord.Object(id=int(os.getenv("DISCORD_GUILD_ID")))
+    tree.copy_global_to(guild=guild)
+    await tree.sync(guild=guild)
     print(f"[+] Bot online as {client.user}")
     print(f"[+] Authorized user ID: {ALLOWED_USER_ID}")
     print(f"[+] Audit log: {LOG_FILE}")
+    print(f"[+] Synced commands to guild {guild.id}")
     logging.info(f"Bot started | authorized_user_id={ALLOWED_USER_ID}")
 
 client.run(DISCORD_TOKEN)
